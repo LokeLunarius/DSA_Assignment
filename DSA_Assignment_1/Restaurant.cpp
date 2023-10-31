@@ -18,6 +18,8 @@ class imp_res : public Restaurant
 		int timer_ID = 0;
 		string add_ID = "Add ID";
 		string remove_ID = "Remove ID";
+		string positive = "Positive";
+		string negative = "Negative";
 		/* ****************** End Custom Extra Variable ****************** */
 
 		/* ****************** Begin Custom Extra Function ****************** */
@@ -69,7 +71,7 @@ class imp_res : public Restaurant
 		//------------------ Add Node ------------------//
 		void add_empty(customer* new_cus)
 		{
-			cout << "add empty" << endl;
+			//cout << "add empty" << endl;
 			current_position_X = new_cus;
 			current_position_X->next = current_position_X;
 			current_position_X->prev = current_position_X;
@@ -77,7 +79,7 @@ class imp_res : public Restaurant
 		}
 		void add_Clockwise_current_position_X(customer* new_cus)
 		{
-			cout << "add clockwise" << endl;
+			//cout << "add clockwise" << endl;
 			new_cus->next = current_position_X->next;
 			new_cus->prev = current_position_X;
 			current_position_X->next->prev = new_cus;
@@ -87,7 +89,7 @@ class imp_res : public Restaurant
 		}
 		void add_antiClockwise_current_position_X(customer* new_cus)
 		{
-			cout << "add anticlockwise" << endl;
+			//cout << "add anticlockwise" << endl;
 			new_cus->prev = current_position_X->prev;
 			new_cus->next = current_position_X;
 			current_position_X->prev->next = new_cus;
@@ -97,7 +99,7 @@ class imp_res : public Restaurant
 		}
 		void add_waiting_queue(customer* new_cus)
 		{
-			cout << "add waiting queue" << endl;
+			//cout << "add waiting queue" << endl;
 			new_cus->prev = new_cus;
 			new_cus->next = new_cus;
 			if (waiting_queue_head == NULL)
@@ -188,7 +190,6 @@ class imp_res : public Restaurant
 				}
 				if (temp == current_cus->name)
 				{
-					ID = -999;
 					return;
 				}
 				ID = stoi(temp);
@@ -196,10 +197,6 @@ class imp_res : public Restaurant
 			}
 			else if (order == add_ID)
 			{
-				if (ID == -999)
-				{
-					return;
-				}
 				string str_ID = to_string(ID);
 				current_cus->name = current_cus->name + "_" + str_ID;
 			}
@@ -210,6 +207,50 @@ class imp_res : public Restaurant
 			ID_manuver(current_cus, remove_ID, res_ID);
 			ID_manuver(current_cus, add_ID, res_ID);
 			return res_ID;
+		}
+		int get_smallest_ID()
+		{
+			int ID = 0;
+			int min_ID = INT8_MAX;
+			customer* current_cus = current_position_X;
+			for (int i = 0; i < customer_in_restaurant; i++)
+			{
+				ID = get_customer_ID(current_cus);
+				if (ID < min_ID)
+				{
+					min_ID = ID;
+				}
+				current_cus = current_cus->next;
+			}
+			return min_ID;
+		}
+		int get_largest_ID()
+		{
+			int ID = 0;
+			int max_ID = INT8_MIN;
+			customer* current_cus = current_position_X;
+			for (int i = 0; i < customer_in_restaurant; i++)
+			{
+				ID = get_customer_ID(current_cus);
+				if (ID > max_ID)
+				{
+					max_ID = ID;
+				}
+				current_cus = current_cus->next;
+			}
+			return max_ID;
+		}
+		void reduce_ID(int max_ID)
+		{
+			int ID = 0;
+			customer* scanner = current_position_X;
+			for (int i = 0; i < customer_in_restaurant; i++)
+			{
+				ID_manuver(scanner, remove_ID, ID);
+				ID = ID - max_ID;
+				ID_manuver(scanner, add_ID, ID);
+				scanner = scanner->next;
+			}
 		}
 		customer* search_customer_ID(int ID)
 		{
@@ -224,6 +265,34 @@ class imp_res : public Restaurant
 				search_cus = search_cus->next;
 			}
 			return current_position_X;
+		}
+		int get_largest_ID_queue()
+		{
+			int ID = 0;
+			int max_ID = INT8_MIN;
+			customer* current_cus = waiting_queue_head;
+			for (int i = 0; i < customer_in_queue; i++)
+			{
+				ID = get_customer_ID(current_cus);
+				if (ID > max_ID)
+				{
+					max_ID = ID;
+				}
+				current_cus = current_cus->next;
+			}
+			return max_ID;
+		}
+		void reduce_ID_queue(int max_ID)
+		{
+			int ID = 0;
+			customer* scanner = waiting_queue_head;
+			for (int i = 0; i < customer_in_queue; i++)
+			{
+				ID_manuver(scanner, remove_ID, ID);
+				ID = ID - max_ID;
+				ID_manuver(scanner, add_ID, ID);
+				scanner = scanner->next;
+			}
 		}
 		//------------------ Empty Strategy ------------------//
 		void empty_restaurant_strategy(customer* new_cus)
@@ -359,6 +428,35 @@ class imp_res : public Restaurant
 			}
 			return true;
 		}
+		//------------------ Check num of Element ------------------//
+		int num_of_element(string state)
+		{
+			int num = 0;
+			customer* scanner = current_position_X;
+			if (state == positive)
+			{
+				for (int i = 0; i < customer_in_restaurant; i++)
+				{
+					if (scanner->energy > 0)
+					{
+						num++;
+					}
+					scanner = scanner->next;
+				}
+			}
+			else if (state == negative)
+			{
+				for (int i = 0; i < customer_in_restaurant; i++)
+				{
+					if (scanner->energy < 0)
+					{
+						num++;
+					}
+					scanner = scanner->next;
+				}
+			}
+			return num;
+		}
 		//------------------ Swap ------------------//
 		void swap_node(customer* cus_1, customer* cus_2)
 		{
@@ -377,9 +475,191 @@ class imp_res : public Restaurant
 			cus_1_prev->next = cus_2;
 			cus_1_next->prev = cus_2;
 		}
-		void swap_negative()
+		void swap_node_close(customer* cus_1, customer* cus_2)
 		{
+			customer* cus_1_prev = cus_1->prev;
+			customer* cus_2_next = cus_2->next;
 
+			cus_1->prev = cus_2;
+			cus_1->next = cus_2_next;
+			cus_1_prev->next = cus_2;
+
+			cus_2->next = cus_1;
+			cus_2->prev = cus_1_prev;
+			cus_2_next->prev = cus_1;
+		}
+		void swap(int num, string state)
+		{
+			customer* forward = current_position_X;
+			customer* backward = current_position_X->prev;
+			for (int i = 0; i < num / 2; i++)
+			{
+				if (state == positive)
+				{
+					int distance = 0;
+					while (forward->energy < 0)
+					{
+						forward = forward->next;
+						distance++;
+					}
+					while (backward->energy < 0)
+					{
+						backward = backward->prev;
+						distance++;
+					}
+					if (distance == 0)
+					{
+						swap_node_close(forward, backward);
+					}
+					else
+					{
+						swap_node(forward, backward);
+					}
+				}
+				else if(state == negative)
+				{
+					int distance = 0;
+					while (forward->energy > 0)
+					{
+						forward = forward->next;
+						distance++;
+					}
+					while (backward->energy > 0)
+					{
+						backward = backward->prev;
+						distance++;
+					}
+					if (distance == 0)
+					{
+						swap_node_close(forward, backward);
+					}
+					else
+					{
+						swap_node(forward, backward);
+					}
+				}
+				forward = forward->next;
+				backward = backward->prev;
+			}
+		}
+		//------------------ Sort ------------------//
+		int max_abs_energy()
+		{
+			int max_energy = INT8_MIN;
+			customer* scanner = waiting_queue_head;
+			for (int i = 0; i < customer_in_queue; i++)
+			{
+				if (abs(scanner->energy) > max_energy)
+				{
+					max_energy = abs(scanner->energy);
+				}
+				scanner = scanner->next;
+			}
+			return max_energy;
+		}
+		customer* max_abs_energy_node()
+		{
+			int max_energy = max_abs_energy();
+			customer* scanner = waiting_queue_head;
+			for (int i = 0; i < customer_in_queue; i++)
+			{
+				if (abs(scanner->energy) == max_energy)
+				{
+					break;
+				}
+				scanner = scanner->prev;
+			}
+			return scanner;
+		}
+		int from_head_to_highest_abs_energy()
+		{
+			int counter = 1;
+			customer* scanner = waiting_queue_head;
+			customer* end = max_abs_energy_node();
+			while (scanner != end)
+			{
+				counter++;
+				scanner = scanner->next;
+			}
+			return counter;
+		}
+		void shellSort(int n, customer* end_node)
+		{
+			for (int gap = n/2; gap > 0; gap /= 2)
+			{
+				//cout << "gap: " << gap << endl;
+				customer* cus_1 = waiting_queue_head;
+				customer* cus_2 = waiting_queue_head;
+				int counter = gap;
+				while (counter > 0)
+				{
+					cus_2 = cus_2->next;
+					counter--;
+				}
+				int loop_count = 0;
+				for (int i = gap; i < n; i++)
+				{
+					customer* cus_1_next = cus_1->next;
+					customer* cus_2_next = cus_2->next;
+					//cout << "cus 1: " << cus_1->name << " " << cus_1->energy << endl;
+					//cout << "cus 2: " << cus_2->name << " " << cus_2->energy << endl;
+					if (abs(cus_1->energy) > abs(cus_2->energy) && gap > 1)
+					{
+						//cout << "cus 1: " << cus_1->name << " " << cus_1->energy << endl;
+						//cout << "cus 2: " << cus_2->name << " " << cus_2->energy << endl;
+						if (cus_1 == waiting_queue_head)
+						{
+							waiting_queue_head = cus_2;
+						}
+						swap_node(cus_1, cus_2);
+					}
+					else if (abs(cus_1->energy) > abs(cus_2->energy) && gap == 1)
+					{
+						//cout << "cus 1: " << cus_1->name << " " << cus_1->energy << endl;
+						//cout << "cus 2: " << cus_2->name << " " << cus_2->energy << endl;
+						if (cus_1 == waiting_queue_head)
+						{
+							waiting_queue_head = cus_2;
+						}
+						swap_node_close(cus_1, cus_2);
+						cus_1_next = cus_1;
+					}
+					else if (abs(cus_1->energy) == abs(cus_2->energy) && gap > 1)
+					{
+						int cus_1_ID = get_customer_ID(cus_1);
+						int cus_2_ID = get_customer_ID(cus_2);
+						if (cus_1_ID > cus_2_ID)
+						{
+							if (cus_1 == waiting_queue_head)
+							{
+								waiting_queue_head = cus_2;
+							}
+							swap_node(cus_1, cus_2);
+						}
+					}
+					else if (abs(cus_1->energy) == abs(cus_2->energy) && gap == 1)
+					{
+						int cus_1_ID = get_customer_ID(cus_1);
+						int cus_2_ID = get_customer_ID(cus_2);
+						if (cus_1_ID > cus_2_ID)
+						{
+							if (cus_1 == waiting_queue_head)
+							{
+								waiting_queue_head = cus_2;
+							}
+							swap_node_close(cus_1, cus_2);
+							cus_1_next = cus_1;
+						}
+					}
+					//cout << "cus 1: " << cus_1->name << " " << cus_1->energy << endl;
+					//cout << "cus 2: " << cus_2->name << " " << cus_2->energy << endl;
+					cus_1 = cus_1_next;
+					cus_2 = cus_2_next;
+					//cout << "******************" << endl;
+					//print_waiting_queue();
+					//cout << "******************" << endl;
+				}
+			}
 		}
 		/* ****************** END Custom Extra Function ****************** */
 
@@ -419,8 +699,8 @@ class imp_res : public Restaurant
 			customer* scanner = waiting_queue_head;
 			for (int i = 0; i < customer_in_queue; i++)
 			{
-				//int ID = 0;
-				//ID_manuver(scanner, remove_ID, ID);
+				int ID = 0;
+				ID_manuver(scanner, remove_ID, ID);
 				scanner->print();
 				scanner = scanner->next;
 			}
@@ -429,12 +709,38 @@ class imp_res : public Restaurant
 
 		void RED(string name, int energy)
 		{
+			if (energy == 0)
+			{
+				return;
+			}
+			//cout << "red" << " " << name << " " << energy << endl;
+			//reset timer and reduce ID for customer that came before
+			if (timer_ID == INT8_MAX)
+			{
+				if (current_position_X != NULL)
+				{
+					int max_ID = get_largest_ID();
+					reduce_ID(max_ID);
+				}
+				if (waiting_queue_head != NULL)
+				{
+					int max_ID_queue = get_largest_ID_queue();
+					reduce_ID_queue(max_ID_queue);
+				}
+				timer_ID = 0;
+			}
 			timer_ID++;
 			string timer_ID_str = to_string(timer_ID);
 			//cout << "function access successfully" << endl;
 			//cout << name << " " << energy << endl;
 			customer *new_cus = new customer (name, energy, nullptr, nullptr);
 			//cout << MAXSIZE << endl;
+			if (!is_restaurant_full())
+			{
+				
+			}
+			//Check Duplicate
+			new_cus->name = new_cus->name + "_" + timer_ID_str;
 			if (!Ore_Koso_Only_One(new_cus, restaurant_queue))
 			{
 				//cout << "Match" << endl;
@@ -445,8 +751,7 @@ class imp_res : public Restaurant
 				//cout << "Match" << endl;
 				return;
 			}
-
-			new_cus->name = new_cus->name + "_" + timer_ID_str;
+			//Add customer
 			if (is_restaurant_empty())
 			{
 				empty_restaurant_strategy(new_cus);
@@ -462,13 +767,14 @@ class imp_res : public Restaurant
 					add_waiting_queue(new_cus);
 				}
 			}
-			new_cus->print();
+			//new_cus->print();
 			//cout << "customer in restaurant: " << customer_in_restaurant << endl;
 			//cout << "customer in queue: " << customer_in_queue << endl;
 		}
 		void BLUE(int num)
 		{
-			cout << "blue "<< num << endl;
+			//cout << "------------------" << endl;
+			//cout << "blue "<< num << endl;
 			if (num >= MAXSIZE)
 			{
 				while (current_position_X != NULL)
@@ -476,41 +782,93 @@ class imp_res : public Restaurant
 					remove_customer();
 				}
 			}
+			else
+			{
+				//cout << "customer in restaurant before: " << customer_in_restaurant << endl;
+				//cout << "customer in queue before: " << customer_in_queue << endl;
+				for (int i = 0; i < num; i++)
+				{
+					int ID = get_smallest_ID();
+					customer* remove_cus = search_customer_ID(ID);
+					//cout << "ID: " << ID << endl;
+					//cout << "Customer: " << remove_cus->name << " " << remove_cus->energy << endl;
+					current_position_X = remove_cus;
+					remove_customer();
+					//cout << "current X: " << current_position_X->name << " " << current_position_X->energy << endl;
+				}
+				//cout << "customer in restaurant mid: " << customer_in_restaurant << endl;
+				//cout << "customer in queue mid: " << customer_in_queue << endl;
+				while (customer_in_queue > 0 && customer_in_restaurant < MAXSIZE)
+				{
+					//cout << "queue head: " << waiting_queue_head->name << " " << waiting_queue_head->energy << endl;
+					int ID = 0;
+					ID_manuver(waiting_queue_head, remove_ID, ID);
+					//cout << "queue head: " << waiting_queue_head->name << " " << waiting_queue_head->energy << endl;
+					string name = waiting_queue_head->name;
+					int energy = waiting_queue_head->energy;
+					remove_customer_from_queue();
+					RED(name, energy);
+					//cout << "customer in restaurant after: " << customer_in_restaurant << endl;
+					//cout << "customer in queue after: " << customer_in_queue << endl;
+				}
+			}
 		}
 		void PURPLE()
 		{
-			cout << "purple"<< endl;
+			//cout << "purple"<< endl;
+			if (waiting_queue_head == NULL)
+			{
+				return;
+			}
+			int size = from_head_to_highest_abs_energy();
+			//cout << "size: " << size << endl;
+			customer* end_node = max_abs_energy_node();
+			shellSort(size,end_node);
+			//cout << "purple---------------------------------------------------------------------" << endl;
 		}
 		void REVERSAL()
 		{
-			cout << "reversal" << endl;
+			//cout << "reversal" << endl;
+			int energy_state = current_position_X->energy;
+			int num = 0;
+			if (energy_state > 0)
+			{
+				num = num_of_element(positive);
+				swap(num, positive);
+			}
+			else if (energy_state < 0)
+			{
+				num = num_of_element(negative);
+				swap(num, negative);
+			}
 		}
 		void UNLIMITED_VOID()
 		{
-			cout << "unlimited_void" << endl;
+			//cout << "unlimited_void" << endl;
+			// I have no idea :) 
 		}
 		void DOMAIN_EXPANSION()
 		{
-			cout << "domain_expansion" << endl;
+			//cout << "domain_expansion" << endl;
 		}
 		void LIGHT(int num)
 		{
-			cout << "light " << num << endl;
-			cout << "Customer list" << endl;
+			//cout << "light " << num << endl;
+			//cout << "Customer list" << endl;
 			bool pos = true;
 			if (num > 0)
 			{
-				cout << "******************" << endl;
+				//cout << "******************" << endl;
 				print_restaurant(pos);
 			}
 			else if (num < 0)
 			{
-				cout << "******************" << endl;
+				//cout << "******************" << endl;
 				print_restaurant(!pos);
 			}
 			else
 			{
-				cout << "******************" << endl;
+				//cout << "******************" << endl;
 				print_waiting_queue();
 			}
 		}

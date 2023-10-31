@@ -13,7 +13,7 @@ void simulate(string filename, imp_res* r)
 		{
 			ss >> maxsize;
 			MAXSIZE = stoi(maxsize);
-            cout << MAXSIZE << endl;
+            //cout << MAXSIZE << endl;
     	}
         else if(str == "RED") // RED <NAME> <ENERGY>
         {
@@ -54,10 +54,10 @@ int main(int argc, char* argv[]) {
 	//if (argc < 2)
     //	return 1;
 	//  string fileName = argv[1];
-    cout << "program is running" << endl;
+    //cout << "program is running" << endl;
 	imp_res* r = new imp_res();
-    //string fileName = "test.txt";
-	string fileName = "test_red.txt";
+    string fileName = "test.txt";
+	//string fileName = "test_red.txt";
     simulate(fileName, r);
   	delete r;
 	return 0;
